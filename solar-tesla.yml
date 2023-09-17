@@ -1,9 +1,7 @@
 alias: Charge Tesla on Excess Solar
 trigger:
-  - platform: state
-    entity_id: sensor.energy_production
-  - platform: state
-    entity_id: sensor.energy_usage
+  - platform: time_pattern
+    minutes: /5
 condition:
   - condition: sun
     before: sunset
@@ -11,44 +9,37 @@ condition:
   - condition: state
     entity_id: binary_sensor.tesla_wall_connector_vehicle_connected
     state: "on"
+  - condition: template
+    value_template: "{{ now().month >= 3 and now().month <= 10 }}"
 action:
   - choose:
       - conditions:
           - condition: template
             value_template: >-
-              {{ states('sensor.energy_production') | int -
-              states('sensor.energy_usage') | int >
-              variables.excess_solar_threshold }}
+              {{ states('sensor.energy_production') | int - 
+              states('sensor.energy_usage') | int >  3500 }}
           - condition: state
             entity_id: binary_sensor.denis_tesla_charging
             state: "off"
         sequence:
-          - service: tesla_custom.api
-            data:
-              command: charge_start
           - service: notify.notify
             data:
               message: Tesla charging triggered, excess solar above 4KW ☀️
+          - service: switch.turn_on
+            data: {}
+            target:
+              entity_id: switch.denis_tesla_charger
       - conditions:
           - condition: template
-            value_template: >-
-              {{ states('sensor.energy_production') | int -
-              states('sensor.energy_usage') | int <=
-              variables.excess_solar_threshold }}
+            value_template: "{{ states('sensor.energy_production') | int < 2500 }}"
           - condition: state
             entity_id: binary_sensor.denis_tesla_charging
             state: "on"
-            for: "{{ variables.delay_duration }}"
         sequence:
-          - service: tesla_custom.api
-            data:
-              command: charge_stop
           - service: notify.notify
             data:
               message: Tesla charging disabled, solar production is low ⛅
-variables:
-  excess_solar_threshold: 4000
-  delay_duration:
-    hours: 0
-    minutes: 10
-    seconds: 0
+          - service: switch.turn_off
+            data: {}
+            target:
+              entity_id: switch.denis_tesla_charger
