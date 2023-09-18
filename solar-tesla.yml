@@ -11,6 +11,10 @@ condition:
     state: "on"
   - condition: template
     value_template: "{{ now().month >= 3 and now().month <= 10 }}"
+  - condition: template
+    value_template: >-
+      {{ (states('sensor.denis_tesla_battery') | int -
+      states('number.denis_tesla_charge_limit') | int) | abs > 1 }}
 action:
   - choose:
       - conditions:
@@ -31,10 +35,16 @@ action:
               entity_id: switch.denis_tesla_charger
       - conditions:
           - condition: template
-            value_template: "{{ states('sensor.energy_production') | int < 2500 }}"
+            value_template: >-
+              {{ states('sensor.energy_production') | int - 
+              states('sensor.energy_usage') | int < 500 }}
           - condition: state
             entity_id: binary_sensor.denis_tesla_charging
             state: "on"
+            for:
+              hours: 0
+              minutes: 30
+              seconds: 0
           - condition: template
             value_template: "{{ states('sensor.denis_tesla_battery') | int >= 25 }}"
         sequence:
