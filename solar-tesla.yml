@@ -43,14 +43,14 @@ action:
             state: "on"
             for:
               hours: 0
-              minutes: 30
+              minutes: 15
               seconds: 0
           - condition: template
             value_template: "{{ states('sensor.denis_tesla_battery') | int(default=25) >= 25 }}"
           - condition: template
             value_template: >-
               {{ states('sensor.denis_tesla_time_charge_complete') |
-              int(default=10) <= 10 }}
+              int(default=9) >= 10 }}
         sequence:
           - service: notify.notify
             data:

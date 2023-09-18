@@ -21,7 +21,7 @@ This Home Assistant automation triggers the charging of your Tesla when there is
    - Notification: "Tesla charging triggered, excess solar above 4KW ☀️".
 
 2. **Disable Charging**
-   - When the energy production is less than 500W below energy usage, the Tesla has been charging for at least 30 minutes, the battery level is at or above 25%, and the estimated time until the charge is complete is 10 minutes or less.
+   - When the energy production is less than 500W below energy usage, the Tesla has been charging for at least 15 minutes, the battery level is at or above 25%, and the estimated time until the charge is complete is 10 minutes or more.
    - Notification: "Tesla charging disabled, solar production is low ⛅".
 
 ## Entity IDs
